@@ -1,8 +1,6 @@
+![wordart (6)](https://github.com/yacineMTB/dingllm.nvim/assets/10282244/d03ef83d-a5ee-4ddb-928f-742172f3c80c)
 
-
-<video src="https://github.com/yacineMTB/dingllm.nvim/raw/main/demo.mp4" controls>
-  Your browser does not support the video tag.
-</video>
+https://github.com/yacineMTB/dingllm.nvim/assets/10282244/07cf5ace-7e01-46e3-bd2f-5bec3bb019cc
 
 ### dingllm.nvim
 Yacine's LLM nvim scripts
