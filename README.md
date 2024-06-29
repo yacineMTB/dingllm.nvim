@@ -11,6 +11,8 @@ I diff'd on a fork of it until it was basically a rewrite. Thanks @melbaldove!
 The main difference is that this uses events from plenary, rather than a timed async loop. I noticed that on some versions of nvim, melbaldove's extension would deadlock my editor. I suspected nio, so i just rewrote the extension. 
 
 ### lazy config
+Add your API keys to your env (export it in zshrc or bashrc) 
+
 ```
   {
     'yacineMTB/dingllm.nvim',
