@@ -1,3 +1,9 @@
+
+
+<video src="https://github.com/yacineMTB/dingllm.nvim/raw/main/demo.mp4" controls>
+  Your browser does not support the video tag.
+</video>
+
 ### dingllm.nvim
 Yacine's LLM nvim scripts
 
