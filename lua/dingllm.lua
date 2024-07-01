@@ -97,6 +97,8 @@ local function write_string_at_cursor(str)
     local row, col = cursor_position[1], cursor_position[2]
 
     local lines = vim.split(str, '\n')
+
+    vim.cmd("undojoin")
     vim.api.nvim_put(lines, 'c', true, true)
 
     local num_lines = #lines
@@ -148,6 +150,7 @@ end
 
 local group = vim.api.nvim_create_augroup('DING_LLM_AutoGroup', { clear = true })
 local active_job = nil
+
 function M.invoke_llm_and_stream_into_editor(opts, make_curl_args_fn, handle_data_fn)
   vim.api.nvim_clear_autocmds { group = group }
   local prompt = get_prompt(opts)
