@@ -31,7 +31,7 @@ Add your API keys to your env (export it in zshrc or bashrc)
       local function groq_replace()
         dingllm.invoke_llm_and_stream_into_editor({
           url = 'https://api.groq.com/openai/v1/chat/completions',
-          model = 'llama3-70b-8192',
+          model = 'llama3.1-70b-versatile',
           api_key_name = 'GROQ_API_KEY',
           system_prompt = system_prompt,
           replace = true,
