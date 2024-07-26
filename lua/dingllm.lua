@@ -51,7 +51,7 @@ function M.get_visual_selection()
   end
 end
 
-function M.make_anthropic_spec_curl_args(opts, prompt, system_prompt)
+local function make_anthropic_spec_curl_args(opts, prompt, system_prompt)
   local url = opts.url
   local api_key = opts.api_key_name and get_api_key(opts.api_key_name)
   local data = {
@@ -72,7 +72,7 @@ function M.make_anthropic_spec_curl_args(opts, prompt, system_prompt)
   return args
 end
 
-function M.make_openai_spec_curl_args(opts, prompt, system_prompt)
+local function make_openai_spec_curl_args(opts, prompt, system_prompt)
   local url = opts.url
   local api_key = opts.api_key_name and get_api_key(opts.api_key_name)
   local data = {
@@ -127,7 +127,7 @@ local function get_prompt(opts)
   return prompt
 end
 
-function M.handle_anthropic_spec_data(data_stream, event_state)
+local function handle_anthropic_spec_data(data_stream, event_state)
   if event_state == 'content_block_delta' then
     local json = vim.json.decode(data_stream)
     if json.delta and json.delta.text then
@@ -136,7 +136,7 @@ function M.handle_anthropic_spec_data(data_stream, event_state)
   end
 end
 
-function M.handle_openai_spec_data(data_stream)
+local function handle_openai_spec_data(data_stream)
   if data_stream:match '"delta":' then
     local json = vim.json.decode(data_stream)
     if json.choices and json.choices[1] and json.choices[1].delta then
@@ -148,10 +148,32 @@ function M.handle_openai_spec_data(data_stream)
   end
 end
 
+local function containsSubstring(str, substr)
+    return string.find(str, substr) ~= nil
+end
+
+local function infer_curl_args_fn(opts)
+  if containsSubstring(opts.url, 'anthropic') then
+    return make_anthropic_spec_curl_args
+  else
+    return make_openai_spec_curl_args
+  end
+end
+
+local function infer_handle_data_fn(opts)
+  if containsSubstring(opts.url, 'anthropic') then
+    return handle_anthropic_spec_data
+  else
+    return handle_openai_spec_data
+  end
+end
+
 local group = vim.api.nvim_create_augroup('DING_LLM_AutoGroup', { clear = true })
 local active_job = nil
 
-function M.invoke_llm_and_stream_into_editor(opts, make_curl_args_fn, handle_data_fn)
+function M.invoke_llm_and_stream_into_editor(opts)
+  local make_curl_args_fn = infer_curl_args_fn(opts)
+  local handle_data_fn = infer_handle_data_fn(opts)
   vim.api.nvim_clear_autocmds { group = group }
   local prompt = get_prompt(opts)
   local system_prompt = opts.system_prompt or 'You are a tsundere uwu anime. Yell at me for not setting my configuration for my llm plugin correctly'
