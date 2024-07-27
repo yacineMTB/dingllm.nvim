@@ -5,6 +5,17 @@ local function get_api_key(name)
   return os.getenv(name)
 end
 
+function M.get_file_extension()
+  local filename = vim.fn.expand("%:t")
+  local ext = filename:match("^.+(%..+)$")
+
+  if ext then
+    return "This file has the extension " .. ext .. "."
+  end
+  return ""
+end
+
+
 function M.get_lines_until_cursor()
   local current_buffer = vim.api.nvim_get_current_buf()
   local current_window = vim.api.nvim_get_current_win()
