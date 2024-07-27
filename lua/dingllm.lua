@@ -5,7 +5,7 @@ local function get_api_key(name)
   return os.getenv(name)
 end
 
-function M.get_file_extension()
+function M.get_file_extension_prompt()
   local filename = vim.fn.expand("%:t")
   local ext = filename:match("^.+(%..+)$")
 
