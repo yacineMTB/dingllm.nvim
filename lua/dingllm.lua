@@ -8,7 +8,11 @@ end
 function M.get_file_extension()
 	local filename = vim.fn.expand("%:t")
 	local ext = filename:match("^.+(%..+)$")
-	return "This file has the extension " .. ext .. "."
+
+	if ext then
+		return "This file has the extension " .. ext .. "."
+	end
+	return ""
 end
 
 function M.get_lines_until_cursor()
