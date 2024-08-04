@@ -92,6 +92,27 @@ Add your API keys to your env (export it in zshrc or bashrc)
         }, dingllm.make_openai_spec_curl_args, dingllm.handle_openai_spec_data)
       end
 
+
+    local function ollama_replace()
+      dingllm.invoke_llm_and_stream_into_editor({
+        url = 'http://localhost:11434/v1/chat/completions',
+        model = 'llama3.1', -- or any other model you have in Ollama
+        api_key_name = 'ollama', -- Ollama doesn't require an API key
+        system_prompt = system_prompt,
+        replace = true,
+      }, dingllm.make_openai_spec_curl_args, dingllm.handle_openai_spec_data)
+    end
+
+    local function ollama_help()
+      dingllm.invoke_llm_and_stream_into_editor({
+        url = 'http://localhost:11434/v1/chat/completions',
+        model = 'llama3.1', -- or any other model you have in Ollama
+        api_key_name = 'ollama', -- Ollama doesn't require an API key
+        system_prompt = helpful_prompt,
+        replace = false,
+      }, dingllm.make_openai_spec_curl_args, dingllm.handle_openai_spec_data)
+    end
+
       local function openai_replace()
         dingllm.invoke_llm_and_stream_into_editor({
           url = 'https://api.openai.com/v1/chat/completions',
@@ -138,6 +159,8 @@ Add your API keys to your env (export it in zshrc or bashrc)
       vim.keymap.set({ 'n', 'v' }, '<leader>l', openai_replace, { desc = 'llm openai' })
       vim.keymap.set({ 'n', 'v' }, '<leader>I', anthropic_help, { desc = 'llm anthropic_help' })
       vim.keymap.set({ 'n', 'v' }, '<leader>i', anthropic_replace, { desc = 'llm anthropic' })
+      vim.keymap.set({ 'n', 'v' }, '<leader>o', ollama_replace, { desc = 'llm ollama' })
+      vim.keymap.set({ 'n', 'v' }, '<leader>O', ollama_help, { desc = 'llm ollama_help' })
       vim.keymap.set({ 'n', 'v' }, '<leader>o', llama_405b_base, { desc = 'llama base' })
     end,
   },
