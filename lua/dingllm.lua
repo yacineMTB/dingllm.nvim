@@ -5,16 +5,20 @@ local function get_api_key(name)
   return os.getenv(name)
 end
 
-function M.get_file_extension_prompt()
+local function get_file_extension()
   local filename = vim.fn.expand("%:t")
   local ext = filename:match("^.+(%..+)$")
 
-  if ext then
-    return "This file has the extension " .. ext .. "."
-  end
-  return ""
+  return ext
 end
 
+function M.create_prompt(prompt)
+  local ext = get_file_extension()
+  if ext then
+    prompt = prompt:gsub("$file_ext", ext)
+  end
+  return prompt
+end
 
 function M.get_lines_until_cursor()
   local current_buffer = vim.api.nvim_get_current_buf()
