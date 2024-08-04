@@ -90,7 +90,7 @@ function M.make_openai_spec_curl_args(opts, prompt, system_prompt)
   return args
 end
 
-local function write_string_at_cursor(str)
+function M.write_string_at_cursor(str)
   vim.schedule(function()
     local current_window = vim.api.nvim_get_current_win()
     local cursor_position = vim.api.nvim_win_get_cursor(current_window)
@@ -131,7 +131,7 @@ function M.handle_anthropic_spec_data(data_stream, event_state)
   if event_state == 'content_block_delta' then
     local json = vim.json.decode(data_stream)
     if json.delta and json.delta.text then
-      write_string_at_cursor(json.delta.text)
+      M.write_string_at_cursor(json.delta.text)
     end
   end
 end
@@ -142,7 +142,7 @@ function M.handle_openai_spec_data(data_stream)
     if json.choices and json.choices[1] and json.choices[1].delta then
       local content = json.choices[1].delta.content
       if content then
-        write_string_at_cursor(content)
+        M.write_string_at_cursor(content)
       end
     end
   end
