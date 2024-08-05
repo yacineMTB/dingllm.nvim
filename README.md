@@ -16,9 +16,31 @@ I diff'd on a fork of it until it was basically a rewrite. Thanks @melbaldove!
 
 The main difference is that this uses events from plenary, rather than a timed async loop. I noticed that on some versions of nvim, melbaldove's extension would deadlock my editor. I suspected nio, so i just rewrote the extension.
 
-### lazy config
+### API key setup
 
-Add your API keys to your env (export it in zshrc or bashrc)
+Edit your ~/.bashrc or ~/.zshrc to export your API keys.
+
+```bash
+  # add the following lines to your ~/.bashrc or ~/.zshrc
+  export OPENAI_API_KEY=sk-proj-************************************************
+  # export your other keys...
+```
+
+Alternatively you can directly append your API key to either config file from the terminal.
+
+```bash
+  echo 'export OPENAI_API_KEY=sk-proj-************************************************' >> ~/.bashrc # change to ~/.zshrc if you use zsh.
+  # export your other keys...
+```
+
+Finally, source your config file again and echo your key to verify it's in the env.
+
+```bash
+  source ~/.bashrc # change to ~/.zshrc if you use zsh.
+  echo $OPENAI_API_KEY
+```
+
+### lazy config
 
 ````
   {
