@@ -103,7 +103,7 @@ Finally, source your config file again and echo your key to verify it's in the e
           api_key_name = 'GROQ_API_KEY',
           system_prompt = system_prompt,
           replace = true,
-        })
+        }, dingllm.make_openai_spec_curl_args, dingllm.handle_openai_spec_data)
       end
 
       local function groq_help()
@@ -113,7 +113,7 @@ Finally, source your config file again and echo your key to verify it's in the e
           api_key_name = 'GROQ_API_KEY',
           system_prompt = helpful_prompt,
           replace = false,
-        })
+        }, dingllm.make_openai_spec_curl_args, dingllm.handle_openai_spec_data)
       end
 
 
@@ -144,7 +144,7 @@ Finally, source your config file again and echo your key to verify it's in the e
           api_key_name = 'OPENAI_API_KEY',
           system_prompt = system_prompt,
           replace = true,
-        })
+        }, dingllm.make_openai_spec_curl_args, dingllm.handle_openai_spec_data)
       end
 
       local function openai_help()
@@ -154,7 +154,7 @@ Finally, source your config file again and echo your key to verify it's in the e
           api_key_name = 'OPENAI_API_KEY',
           system_prompt = helpful_prompt,
           replace = false,
-        })
+        }, dingllm.make_openai_spec_curl_args, dingllm.handle_openai_spec_data)
       end
 
       local function anthropic_help()
@@ -164,7 +164,7 @@ Finally, source your config file again and echo your key to verify it's in the e
           api_key_name = 'ANTHROPIC_API_KEY',
           system_prompt = helpful_prompt,
           replace = false,
-        })
+        }, dingllm.make_anthropic_spec_curl_args, dingllm.handle_anthropic_spec_data)
       end
 
       local function anthropic_replace()
@@ -174,7 +174,7 @@ Finally, source your config file again and echo your key to verify it's in the e
           api_key_name = 'ANTHROPIC_API_KEY',
           system_prompt = system_prompt,
           replace = true,
-        })
+        }, dingllm.make_anthropic_spec_curl_args, dingllm.handle_anthropic_spec_data)
       end
 
       vim.keymap.set({ 'n', 'v' }, '<leader>k', groq_replace, { desc = 'llm groq' })
