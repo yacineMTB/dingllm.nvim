@@ -18,7 +18,7 @@ The main difference is that this uses events from plenary, rather than a timed a
 ### lazy config
 Add your API keys to your env (export it in zshrc or bashrc) 
 
-```
+```lua
   {
     'yacineMTB/dingllm.nvim',
     dependencies = { 'nvim-lua/plenary.nvim' },
