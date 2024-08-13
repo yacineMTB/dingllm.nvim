@@ -42,7 +42,8 @@ Finally, source your config file again and echo your key to verify it's in the e
 
 ### lazy config
 
-````
+
+```lua
   {
     'yacineMTB/dingllm.nvim',
     dependencies = { 'nvim-lua/plenary.nvim' },
