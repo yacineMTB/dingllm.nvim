@@ -25,7 +25,7 @@ Add your API keys to your env (export it in zshrc or bashrc)
     config = function()
       local system_prompt =
         'You should replace the code that you are sent, only following the comments. Do not talk at all. Only output valid code. Do not provide any backticks that surround the code. Never ever output backticks like this ```. Any comment that is asking you for something should be removed after you satisfy them. Other comments should left alone. Do not output backticks'
-      local helpful_prompt = 'You are a helpful assistant. What I have sent are my notes so far. You are very curt, yet helpful.'
+      local helpful_prompt = 'You are a helpful assistant. What I have sent are my notes so far.'
       local dingllm = require 'dingllm'
 
 
@@ -92,42 +92,21 @@ Add your API keys to your env (export it in zshrc or bashrc)
         }, dingllm.make_openai_spec_curl_args, dingllm.handle_openai_spec_data)
       end
 
-
-    local function ollama_replace()
-      dingllm.invoke_llm_and_stream_into_editor({
-        url = 'http://localhost:11434/v1/chat/completions',
-        model = 'llama3.1', -- or any other model you have in Ollama
-        api_key_name = 'ollama', -- Ollama doesn't require an API key
-        system_prompt = system_prompt,
-        replace = true,
-      }, dingllm.make_openai_spec_curl_args, dingllm.handle_openai_spec_data)
-    end
-
-    local function ollama_help()
-      dingllm.invoke_llm_and_stream_into_editor({
-        url = 'http://localhost:11434/v1/chat/completions',
-        model = 'llama3.1', -- or any other model you have in Ollama
-        api_key_name = 'ollama', -- Ollama doesn't require an API key
-        system_prompt = helpful_prompt,
-        replace = false,
-      }, dingllm.make_openai_spec_curl_args, dingllm.handle_openai_spec_data)
-    end
-
-      local function openai_replace()
+      local function llama405b_replace()
         dingllm.invoke_llm_and_stream_into_editor({
-          url = 'https://api.openai.com/v1/chat/completions',
-          model = 'gpt-4o',
-          api_key_name = 'OPENAI_API_KEY',
+          url = 'https://api.lambdalabs.com/v1/chat/completions',
+          model = 'hermes-3-llama-3.1-405b-fp8',
+          api_key_name = 'LAMBDA_API_KEY',
           system_prompt = system_prompt,
           replace = true,
         }, dingllm.make_openai_spec_curl_args, dingllm.handle_openai_spec_data)
       end
 
-      local function openai_help()
+      local function llama405b_help()
         dingllm.invoke_llm_and_stream_into_editor({
-          url = 'https://api.openai.com/v1/chat/completions',
-          model = 'gpt-4o',
-          api_key_name = 'OPENAI_API_KEY',
+          url = 'https://api.lambdalabs.com/v1/chat/completions',
+          model = 'hermes-3-llama-3.1-405b-fp8',
+          api_key_name = 'LAMBDA_API_KEY',
           system_prompt = helpful_prompt,
           replace = false,
         }, dingllm.make_openai_spec_curl_args, dingllm.handle_openai_spec_data)
@@ -155,12 +134,10 @@ Add your API keys to your env (export it in zshrc or bashrc)
 
       vim.keymap.set({ 'n', 'v' }, '<leader>k', groq_replace, { desc = 'llm groq' })
       vim.keymap.set({ 'n', 'v' }, '<leader>K', groq_help, { desc = 'llm groq_help' })
-      vim.keymap.set({ 'n', 'v' }, '<leader>L', openai_help, { desc = 'llm openai_help' })
-      vim.keymap.set({ 'n', 'v' }, '<leader>l', openai_replace, { desc = 'llm openai' })
+      vim.keymap.set({ 'n', 'v' }, '<leader>L', llama405b_help, { desc = 'llm llama405b_help' })
+      vim.keymap.set({ 'n', 'v' }, '<leader>l', llama405b_replace, { desc = 'llm llama405b_replace' })
       vim.keymap.set({ 'n', 'v' }, '<leader>I', anthropic_help, { desc = 'llm anthropic_help' })
       vim.keymap.set({ 'n', 'v' }, '<leader>i', anthropic_replace, { desc = 'llm anthropic' })
-      vim.keymap.set({ 'n', 'v' }, '<leader>o', ollama_replace, { desc = 'llm ollama' })
-      vim.keymap.set({ 'n', 'v' }, '<leader>O', ollama_help, { desc = 'llm ollama_help' })
       vim.keymap.set({ 'n', 'v' }, '<leader>o', llama_405b_base, { desc = 'llama base' })
     end,
   },
