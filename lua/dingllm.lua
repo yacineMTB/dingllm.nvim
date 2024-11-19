@@ -1,5 +1,6 @@
 local M = {}
 local Job = require 'plenary.job'
+local ns_id = vim.api.nvim_create_namespace 'dingllm'
 
 local function get_api_key(name)
   return os.getenv(name)
@@ -90,20 +91,14 @@ function M.make_openai_spec_curl_args(opts, prompt, system_prompt)
   return args
 end
 
-function M.write_string_at_cursor(str)
+function M.write_string_at_extmark(str, extmark_id)
   vim.schedule(function()
-    local current_window = vim.api.nvim_get_current_win()
-    local cursor_position = vim.api.nvim_win_get_cursor(current_window)
-    local row, col = cursor_position[1], cursor_position[2]
+    local extmark = vim.api.nvim_buf_get_extmark_by_id(0, ns_id, extmark_id, { details = false })
+    local row, col = extmark[1], extmark[2]
 
+    vim.cmd 'undojoin'
     local lines = vim.split(str, '\n')
-
-    vim.cmd("undojoin")
-    vim.api.nvim_put(lines, 'c', true, true)
-
-    local num_lines = #lines
-    local last_line_length = #lines[num_lines]
-    vim.api.nvim_win_set_cursor(current_window, { row + num_lines - 1, col + last_line_length })
+    vim.api.nvim_buf_set_text(0, row, col, row, col, lines)
   end)
 end
 
@@ -115,8 +110,7 @@ local function get_prompt(opts)
   if visual_lines then
     prompt = table.concat(visual_lines, '\n')
     if replace then
-      vim.api.nvim_command 'normal! dO'
-      
+      vim.api.nvim_command 'normal! c '
     else
       vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<Esc>', false, true, true), 'nx', false)
     end
@@ -127,22 +121,22 @@ local function get_prompt(opts)
   return prompt
 end
 
-function M.handle_anthropic_spec_data(data_stream, event_state)
+function M.handle_anthropic_spec_data(data_stream, extmark_id, event_state)
   if event_state == 'content_block_delta' then
     local json = vim.json.decode(data_stream)
     if json.delta and json.delta.text then
-      M.write_string_at_cursor(json.delta.text)
+      M.write_string_at_extmark(json.delta.text, extmark_id)
     end
   end
 end
 
-function M.handle_openai_spec_data(data_stream)
+function M.handle_openai_spec_data(data_stream, extmark_id)
   if data_stream:match '"delta":' then
     local json = vim.json.decode(data_stream)
     if json.choices and json.choices[1] and json.choices[1].delta then
       local content = json.choices[1].delta.content
       if content then
-        M.write_string_at_cursor(content)
+        M.write_string_at_extmark(content, extmark_id)
       end
     end
   end
@@ -157,6 +151,8 @@ function M.invoke_llm_and_stream_into_editor(opts, make_curl_args_fn, handle_dat
   local system_prompt = opts.system_prompt or 'You are a tsundere uwu anime. Yell at me for not setting my configuration for my llm plugin correctly'
   local args = make_curl_args_fn(opts, prompt, system_prompt)
   local curr_event_state = nil
+  local crow, _ = unpack(vim.api.nvim_win_get_cursor(0))
+  local stream_end_extmark_id = vim.api.nvim_buf_set_extmark(0, ns_id, crow - 1, -1, {})
 
   local function parse_and_call(line)
     local event = line:match '^event: (.+)$'
@@ -166,7 +162,7 @@ function M.invoke_llm_and_stream_into_editor(opts, make_curl_args_fn, handle_dat
     end
     local data_match = line:match '^data: (.+)$'
     if data_match then
-      handle_data_fn(data_match, curr_event_state)
+      handle_data_fn(data_match, stream_end_extmark_id, curr_event_state)
     end
   end
 
