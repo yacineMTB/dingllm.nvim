@@ -115,8 +115,8 @@ local function get_prompt(opts)
   if visual_lines then
     prompt = table.concat(visual_lines, '\n')
     if replace then
-      vim.api.nvim_command 'normal! d'
-      vim.api.nvim_command 'normal! k'
+      vim.api.nvim_command 'normal! dO'
+      
     else
       vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<Esc>', false, true, true), 'nx', false)
     end
