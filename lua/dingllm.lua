@@ -16,6 +16,29 @@ function M.get_lines_until_cursor()
   return table.concat(lines, '\n')
 end
 
+
+function M.get_lines_from_file(s)
+  local start_index = 1
+  local lines = {}
+  while true do
+    local at_pos = string.find(s, '@', start_index, true)
+    if not at_pos then break end
+    local space_pos = string.find(s, ' ', at_pos) or #s + 1
+    local filename = string.sub(s, at_pos + 1, space_pos - 1)
+    local file_lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+    if vim.fn.filereadable(filename) == 1 then
+      file_lines = vim.fn.readfile(filename)
+    end
+    table.insert(lines, "\nfile " .. filename ..":\n")
+    for _, line in ipairs(file_lines) do
+      table.insert(lines, line)
+    end
+    start_index = space_pos
+  end
+  return table.concat(lines, '\n')
+end
+
+
 function M.get_visual_selection()
   local _, srow, scol = unpack(vim.fn.getpos 'v')
   local _, erow, ecol = unpack(vim.fn.getpos '.')
@@ -72,6 +95,7 @@ function M.make_anthropic_spec_curl_args(opts, prompt, system_prompt)
   return args
 end
 
+
 function M.make_openai_spec_curl_args(opts, prompt, system_prompt)
   local url = opts.url
   local api_key = opts.api_key_name and get_api_key(opts.api_key_name)
@@ -95,7 +119,6 @@ function M.write_string_at_cursor(str)
     local current_window = vim.api.nvim_get_current_win()
     local cursor_position = vim.api.nvim_win_get_cursor(current_window)
     local row, col = cursor_position[1], cursor_position[2]
-
     local lines = vim.split(str, '\n')
 
     vim.cmd("undojoin")
@@ -106,6 +129,7 @@ function M.write_string_at_cursor(str)
     vim.api.nvim_win_set_cursor(current_window, { row + num_lines - 1, col + last_line_length })
   end)
 end
+
 
 local function get_prompt(opts)
   local replace = opts.replace
@@ -121,10 +145,37 @@ local function get_prompt(opts)
       vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<Esc>', false, true, true), 'nx', false)
     end
   else
-    prompt = M.get_lines_until_cursor()
+    prompt = M.get_lines_until_cursor()    
   end
 
+  
   return prompt
+end
+
+function M.open_new_win(opts, prompt)
+  local buf_name = "dingllm_buf"
+  local existing_buf = vim.fn.bufnr(buf_name)
+  local buf
+  
+  if existing_buf ~= -1 and vim.api.nvim_buf_is_valid(existing_buf) then
+    buf = existing_buf
+    vim.api.nvim_buf_set_lines(buf, 0, -1, false, {})
+  else
+    buf = vim.api.nvim_create_buf(true, true)
+    vim.api.nvim_buf_set_name(buf, buf_name)
+  end
+
+  local existing_win = vim.fn.win_findbuf(buf)
+  if #existing_win == 0 then
+    local win = vim.api.nvim_open_win(buf, true, opts)
+  else
+    vim.api.nvim_set_current_win(existing_win[1])
+  end
+  -- Set cursor to end of buff
+  local last_line = vim.api.nvim_buf_line_count(buf)
+  vim.api.nvim_win_set_cursor(0, {last_line, 0})
+  M.write_string_at_cursor('Prompt:\n' .. prompt .. '\nResponse:\n')
+  return buf
 end
 
 function M.handle_anthropic_spec_data(data_stream, event_state)
@@ -151,12 +202,19 @@ end
 local group = vim.api.nvim_create_augroup('DING_LLM_AutoGroup', { clear = true })
 local active_job = nil
 
-function M.invoke_llm_and_stream_into_editor(opts, make_curl_args_fn, handle_data_fn)
+function M.invoke_llm_and_stream_into_editor(opts, make_curl_args_fn, handle_data_fn, new_win)
   vim.api.nvim_clear_autocmds { group = group }
   local prompt = get_prompt(opts)
   local system_prompt = opts.system_prompt or 'You are a tsundere uwu anime. Yell at me for not setting my configuration for my llm plugin correctly'
+ 
+  if new_win then
+    M.open_new_win({split = 'right', win=0}, prompt) 
+  end
+  prompt = prompt .. M.get_lines_from_file(prompt)
+  
   local args = make_curl_args_fn(opts, prompt, system_prompt)
   local curr_event_state = nil
+  
 
   local function parse_and_call(line)
     local event = line:match '^event: (.+)$'
